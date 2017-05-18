@@ -337,12 +337,6 @@ include("statistics.jl")
 # irrational mathematical constants
 include("irrationals.jl")
 
-# signal processing
-include("dft.jl")
-importall .DFT
-include("dsp.jl")
-importall .DSP
-
 # Fast math
 include("fastmath.jl")
 importall .FastMath

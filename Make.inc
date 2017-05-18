@@ -34,7 +34,6 @@ USE_SYSTEM_OPENSPECFUN:=0
 USE_SYSTEM_DSFMT:=0
 USE_SYSTEM_BLAS:=0
 USE_SYSTEM_LAPACK:=0
-USE_SYSTEM_FFTW:=0
 USE_SYSTEM_GMP:=0
 USE_SYSTEM_MPFR:=0
 USE_SYSTEM_ARPACK:=0
@@ -53,8 +52,6 @@ USE_LLVM_SHLIB := 1
 ## Settings for various Intel tools
 # Set to 1 to use MKL
 USE_INTEL_MKL ?= 0
-# Set to 1 to use MKL FFT
-USE_INTEL_MKL_FFT ?= 0
 # Set to 1 to use Intel LIBM
 USE_INTEL_LIBM ?= 0
 # Set to 1 to enable profiling with Intel VTune Amplifier
@@ -832,14 +829,6 @@ LIBLAPACKNAME := liblapack
 endif
 endif
 
-ifeq ($(OS), WINNT)
-LIBFFTWNAME := libfftw3
-LIBFFTWFNAME := libfftw3f
-else
-LIBFFTWNAME := libfftw3_threads
-LIBFFTWFNAME := libfftw3f_threads
-endif
-
 ifeq ($(USE_SYSTEM_LIBM), 1)
 LIBM := -lm
 LIBMNAME := libm
@@ -1021,12 +1010,6 @@ ifneq ($(strip $(MKLLIB)),)
 endif
 LIBBLAS   := $(MKL_LDFLAGS)
 LIBLAPACK := $(MKL_LDFLAGS)
-endif
-
-ifeq ($(USE_INTEL_MKL_FFT), 1)
-USE_SYSTEM_FFTW := 1
-LIBFFTWNAME := libmkl_rt
-LIBFFTWFNAME := libmkl_rt
 endif
 
 ifeq ($(HAVE_SSP),1)

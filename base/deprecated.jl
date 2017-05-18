@@ -1342,6 +1342,49 @@ end
 @deprecate srand(filename::AbstractString, n::Integer=4) srand(read!(filename, Array{UInt32}(Int(n))))
 @deprecate MersenneTwister(filename::AbstractString)  srand(MersenneTwister(0), read!(filename, Array{UInt32}(Int(4))))
 
+# PR #21956
+macro _depfftw(f)
+    quote
+        function $(esc(f))(args...; kwargs...)
+            error($f, " has been moved to the package FFTW.jl.\n",
+                  "Run `Pkg.add(\"FFTW\")` to install FFTW on Julia v0.7 and later, ",
+                  "and then run `using FFTW` to load it.")
+        end
+        export $(esc(f))
+    end
+end
+function _fftwie(mod::Module)
+    s = Symbol(mod)
+    vars = filter(n -> n !== s, names(mod))
+    imports = map(v -> Expr(:import, s, v), vars)
+    return Expr(:toplevel, imports..., Expr(:export, vars...))
+end
+
+module DFT
+    for f in [:bfft, :bfft!, :brfft, :dct, :dct!, :fft, :fft!, :fftshift, :idct, :idct!,
+              :ifft, :ifft!, :ifftshift, :irfft, :plan_bfft, :plan_bfft!, :plan_brfft,
+              :plan_dct, :plan_dct!, :plan_fft, :plan_fft!, :plan_idct, :plan_idct!,
+              :plan_ifft, :plan_ifft!, :plan_irfft, :plan_rfft, :rfft]
+        @eval Base.@_depfftw($f)
+    end
+    module FFTW
+        for f in [:r2r, :r2r!, :plan_r2r, :plan_r2r!]
+            @eval Base.@_depfftw($f)
+        end
+    end
+end
+@eval _fftwie($DFT)
+
+const FFTW = DFT.FFTW
+export FFTW
+
+module DSP
+    for f in [:conv, :conv2, :deconv, :filt, :filt!, :xcorr]
+        @eval Base.@_depfftw($f)
+    end
+end
+@eval _fftwie($DSP)
+
 # END 0.7 deprecations
 
 # BEGIN 1.0 deprecations
