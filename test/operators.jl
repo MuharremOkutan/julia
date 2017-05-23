@@ -97,3 +97,15 @@ end
     B = 3 .> [1 -1 5] .> 0
     @test B == [true false false]
 end
+
+Base.:(<)(x::Type, y::Type) = (x <: y) & (x != y)
+@testset "poset" begin
+    #   Real
+    #  /    \
+    # Int  Float64
+    #  \    /
+    #  Union{}
+    @test Int <= Int
+    @test Int <= Real
+    @test !(Int <= Float64)
+end
